@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Estoque - Sorveteria Gelato</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 4px solid #3498db;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .controls {
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            background: #ecf0f1;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .controls input, .controls button {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .controls input {
+            flex: 1;
+            min-width: 200px;
+            border: 1px solid #ddd;
+            transition: border-color 0.3s;
+        }
+
+        .controls input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .controls button {
+            background: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .controls button:hover {
+            background: #2980b9;
+        }
+
+        .search-bar {
+            padding: 20px;
+            background: #ecf0f1;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .table-container {
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            background: #2c3e50;
+            color: white;
+            font-weight: 600;
+        }
+
+        td {
+            border-bottom: 1px solid #eee;
+        }
+
+        tr {
+            transition: background 0.2s;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            margin-right: 5px;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .update-btn {
+            background: #3498db;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+        }
+
+        .action-btn:hover.update-btn {
+            background: #2980b9;
+        }
+
+        .action-btn:hover.delete-btn {
+            background: #c0392b;
+        }
+
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+            .controls input, .controls button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gestão de Estoque - Sorveteria Gelato</h1>
+            <p>Controle eficiente do seu estoque de sorvetes</p>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="saborInput" placeholder="Sabor do sorvete">
+            <input type="number" id="quantidadeInput" placeholder="Quantidade (litros)">
+            <button onclick="adicionarItem()">Adicionar Item</button>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Pesquisar por sabor..." onkeyup="filtrarEstoque()">
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sabor</th>
+                        <th>Quantidade (L)</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="estoqueBody">
+                    <!-- Itens serão adicionados aqui via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        let estoque = [];
+    
+        // Função para carregar dados iniciais
+        function carregarDadosIniciais() {
+            fetch('/api/estoque/')
+                .then(response => response.json())
+                .then(data => {
+                    estoque = data;
+                    atualizarTabela();
+                })
+                .catch(error => console.error('Erro ao carregar dados:', error));
+        }
+    
+        // Função para adicionar novo item
+        function adicionarItem() {
+            const sabor = document.getElementById('saborInput').value.trim();
+            const quantidade = document.getElementById('quantidadeInput').value;
+    
+            if (sabor && quantidade > 0) {
+                const item = {
+                    name: sabor,
+                    description: "Sorvete adicionado via sistema",
+                    stock: parseInt(quantidade),
+                    type_id: 1,  // Ajuste conforme o ID do tipo (ex.: "Sorvete")
+                    value: 0.0,  // Ajuste conforme necessário
+                    um_id: 1     // Ajuste conforme o ID da medida (ex.: "L")
+                };
+    
+                fetch('/api/estoque/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(item)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    estoque.push(data);
+                    atualizarTabela();
+                    document.getElementById('saborInput').value = '';
+                    document.getElementById('quantidadeInput').value = '';
+                })
+                .catch(error => console.error('Erro ao adicionar:', error));
+            } else {
+                alert('Preencha todos os campos corretamente!');
+            }
+        }
+    
+        // Função para atualizar quantidade
+        function atualizarQuantidade(index) {
+            const novaQuantidade = prompt('Digite a nova quantidade:', estoque[index].stock);
+            if (novaQuantidade !== null && !isNaN(novaQuantidade) && novaQuantidade >= 0) {
+                const item = { stock: parseInt(novaQuantidade) };
+                fetch(`/api/estoque/${estoque[index].id}/`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(item)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    estoque[index] = data;
+                    atualizarTabela();
+                })
+                .catch(error => console.error('Erro ao atualizar:', error));
+            }
+        }
+    
+        // Função para deletar item
+        function deletarItem(index) {
+            if (confirm(`Tem certeza que deseja remover ${estoque[index].name}?`)) {
+                fetch(`/api/estoque/${estoque[index].id}/`, {
+                    method: 'DELETE'
+                })
+                .then(() => {
+                    estoque.splice(index, 1);
+                    atualizarTabela();
+                })
+                .catch(error => console.error('Erro ao deletar:', error));
+            }
+        }
+    
+        // Função para filtrar o estoque
+        function filtrarEstoque() {
+            const termo = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = estoque.filter(item => item.name.toLowerCase().includes(termo));
+            atualizarTabela(filtered);
+        }
+    
+        // Função para atualizar a tabela
+        function atualizarTabela(data = estoque) {
+            const tbody = document.getElementById('estoqueBody');
+            tbody.innerHTML = '';
+    
+            data.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.stock}</td>
+                    <td>
+                        <button class="action-btn update-btn" onclick="atualizarQuantidade(${index})">Atualizar</button>
+                        <button class="action-btn delete-btn" onclick="deletarItem(${index})">Deletar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    
+        // Carrega os dados ao iniciar
+        window.onload = carregarDadosIniciais;
+    </script>
+</body>
+</html>

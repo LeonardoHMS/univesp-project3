@@ -1,0 +1,4 @@
+venv
+token.txt
+db.sqlite3
+.mypy_cache
