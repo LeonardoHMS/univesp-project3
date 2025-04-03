@@ -151,7 +151,143 @@ curl -X POST http://localhost:8000/api/estoque/ \
 -H "Content-Type: application/json" \
 -d '{"name": "Morango", "description": "Sorvete de morango", "stock": 20, "type_id": 1, "value": 5.5, "um_id": 1}'
 
-4. Detalhar, Atualizar e Deletar Produto
+### 4. Listar e Criar Unidades de Medida
+#### GET /api/medida/
+Lista todos as unidades de medida para produtos.
+
+Cabeçalhos:
+
+Authorization: Token <token>
+
+Respostas:
+
+200 OK:
+
+[
+	{
+		"id": 1,
+		"name_abv": "UN",
+		"name": "Unidade"
+	}
+]
+
+401 Unauthorized:
+
+{
+  "detail": "Authentication credentials were not provided."
+}
+
+Exemplo:
+
+curl -X GET http://localhost:8000/api/medida/ \
+-H "Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b"
+
+#### POST /api/medida/
+Cria uma nova unidade de medida.
+
+Cabeçalhos:
+
+Authorization: Token <token>
+Content-Type: application/json
+
+Parâmetros de Entrada:
+
+{
+	"name_abv": "PAC", // Obrigatório: Nome abreviado
+	"name": "Pacote"   // Obrigatório: Nome da unidade
+}
+
+Respostas:
+
+201 Created:
+
+{
+	"id": 3,
+	"name_abv": "L",
+	"name": "Litros"
+}
+
+400 Bad Request:
+
+{
+  "name": ["This field is required."]
+}
+
+Exemplo:
+
+curl -X POST http://localhost:8000/api/medida/ \
+-H "Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b" \
+-H "Content-Type: application/json" \
+-d '{"name_abv": "L", "name": "Litros"}'
+
+### 5. Listar e Criar Tipos de Produtos
+#### GET /api/tipo/
+Lista todos as unidades de medida para produtos.
+
+Cabeçalhos:
+
+Authorization: Token <token>
+
+Respostas:
+
+200 OK:
+
+[
+	{
+		"id": 1,
+		"name": "Picolé"
+	}
+]
+
+401 Unauthorized:
+
+{
+  "detail": "Authentication credentials were not provided."
+}
+
+Exemplo:
+
+curl -X GET http://localhost:8000/api/tipo/ \
+-H "Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b"
+
+#### POST /api/tipo/
+Cria uma novo tipo para produto.
+
+Cabeçalhos:
+
+Authorization: Token <token>
+Content-Type: application/json
+
+Parâmetros de Entrada:
+
+{
+  "name": "Massa"  // Obrigatório: Nome do Tipo
+}
+
+Respostas:
+
+201 Created:
+
+{
+	"id": 2,
+	"name": "Massa"
+}
+
+400 Bad Request:
+
+{
+  "name": ["This field is required."]
+}
+
+Exemplo:
+
+curl -X POST http://localhost:8000/api/tipo/ \
+-H "Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b" \
+-H "Content-Type: application/json" \
+-d '{"name": "Massa"}'
+
+
+6. Detalhar, Atualizar e Deletar Produto
 GET /api/estoque/<int:pk>/
 Retorna os detalhes de um produto específico.
 
